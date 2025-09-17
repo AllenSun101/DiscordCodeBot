@@ -2,6 +2,9 @@ import os
 import time
 from collections import defaultdict
 import discord
+import time
+import threading
+from flask import Flask
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -23,6 +26,19 @@ ai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Conversation history { user_id: { "messages": [...], "last_active": timestamp } }
 conversations = defaultdict(lambda: {"messages": [], "last_active": 0})
+
+app = Flask("")
+
+@app.route("/")
+def home():
+    return "Bot is alive!"
+
+def run_flask():
+    app.run(host="0.0.0.0", port=5000)
+
+def keep_alive():
+    t = threading.Thread(target=run_flask)
+    t.start()
 
 def add_message(user_id, role, content):
     now = time.time()
@@ -83,4 +99,5 @@ async def on_message(message):
         print(f"❌ Error: {e}")
         await message.channel.send("Hmm, something went wrong. Please try again later.")
 
+keep_alive()
 client.run(DISCORD_TOKEN)
