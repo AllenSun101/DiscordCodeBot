@@ -17,6 +17,9 @@ ALLOWED_CHANNEL_ID = int(os.getenv("CHANNEL_ID", "0"))
 MAX_HISTORY = 10
 INACTIVITY_TIMEOUT = 1800
 
+BOT_PROMPT = os.getenv("BOT_PROMPT", 
+                       "You are a helpful AI coding teaching assistant. Provide help and fix code like a TA. Be very concise and conversational.")
+
 intents = discord.Intents.default()
 intents.messages = True
 intents.message_content = True
@@ -81,7 +84,7 @@ async def on_message(message):
         response = ai_client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a helpful AI coding teaching assistant. Provide help and fix code like a TA. Be very concise and conversational."}
+                {"role": "system", "content": BOT_PROMPT}
             ] + conversations[user_id]["messages"],
             max_tokens=500,
         )
