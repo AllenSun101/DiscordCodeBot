@@ -82,7 +82,7 @@ async def on_message(message):
 
     try:
         response = ai_client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-5-mini",
             messages=[
                 {"role": "system", "content": BOT_PROMPT}
             ] + conversations[user_id]["messages"],
