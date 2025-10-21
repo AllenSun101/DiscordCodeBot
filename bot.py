@@ -7,12 +7,15 @@ import threading
 from flask import Flask
 from openai import OpenAI
 from dotenv import load_dotenv
+import aiohttp
 
 load_dotenv() 
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_KEY")
 ALLOWED_CHANNEL_ID = int(os.getenv("CHANNEL_ID", "0"))
+deployment_url = os.getenv("DEPLOYMENT_URL", "")
+
 
 MAX_HISTORY = 10
 INACTIVITY_TIMEOUT = 1800
@@ -44,6 +47,14 @@ def keep_alive():
     t = threading.Thread(target=run_flask)
     t.start()
 
+async def keep_alive_ping():
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(deployment_url) as resp:
+                print(f"Pinged self ({resp.status})")
+    except Exception as e:
+        print(f"Ping failed: {e}")
+
 def add_message(user_id, role, content):
     now = time.time()
     convo = conversations[user_id]
@@ -71,6 +82,8 @@ async def on_message(message):
     
     if client.user not in message.mentions:
         return
+    
+    await keep_alive_ping()
     
     user_id = str(message.author.id)
     user_message = message.content.replace(f"<@{client.user.id}>", "").strip()
